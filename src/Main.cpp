@@ -23,13 +23,23 @@
 #include <Agrumino.h>
 
 const String getChipId();
+void deepSleepSec(int sec);
+bool checkIfResetWiFiSettings();
+String getFullJsonString(float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge);
+String getJsonString(float value) ;
+String getJsonString(bool value) ;
+String getJsonString(int value) ;
+String getJsonString(String value);
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_SEC 60  
+#define SLEEP_TIME_SEC 3000 
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 
 const char *MQTT_BROKER = "10.0.128.128";
 const int MQTT_PORT = 1883;
+
+long int lastSendDataMillis = 0;
+#define SEND_DATA_EVERY_MS 1500
 
 String m_id = getChipId();
 
@@ -52,10 +62,12 @@ bool shouldSaveConfig = false;
 
 void sendData();
 
-String dweetThingName = "sensor_" + getChipId();
+String dweetThingName = "orto_01";//"sensor_" + getChipId();
   
 int g_mqttConnectionTimeout = 0;
 int g_wifiConnectionTimeout = 0;
+
+void blinkLed(int duration, int blinks);
 
 bool mqttConnect()
 {  
@@ -91,7 +103,7 @@ bool mqttConnect()
       else
       {
         Serial.print( ".");
-        delaySec(1);
+        delay(1);
       }
       
 
@@ -121,6 +133,7 @@ void goToSleep( const String& reason, int blink_times = 5 )
 
 void setup() 
 {
+  agrumino.turnBoardOn();
   
   Serial.begin(115200);
 
@@ -203,6 +216,11 @@ void mqttCallback(const char *topic, byte *message, unsigned int length)
 
 }
 
+void publish( String _topic, String _payload )
+{
+  mqtt.publish( _topic.c_str() , _payload.c_str()  );
+}
+
 void sendData()
 {
   mqtt.loop();
@@ -215,11 +233,41 @@ void sendData()
   boolean isBatteryCharging = agrumino.isBatteryCharging();
 
   
-  String topic = String("casa/sensori/") + dweetThingName;
+  String topic = String("/casa/sensori/") + dweetThingName;
 
-  String full = getFullJsonString( temperature, soilMoisture, illuminance, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
+  //String full = getFullJsonString( temperature, soilMoisture, illuminance, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
 
-  mqtt.publish( topic.c_str() , full.c_str()  );
+  String st = "";
+  
+  st =getJsonString( temperature );
+  publish( topic + "/temperature" , st  );
+
+    st = getJsonString( (int)soilMoisture );
+  publish( topic + "/soilMoisture" , st  );
+
+  st = getJsonString( illuminance );
+  publish( topic + "/illuminance" , st  );
+
+  st = getJsonString( batteryVoltage );
+  publish( topic + "/batteryVoltage" , st  );
+
+  st = getJsonString( (int)batteryLevel );
+  publish( topic + "/batteryLevel" , st  );
+
+  st = getJsonString( isAttachedToUSB  );
+  publish( topic + "/isAttachedToUSB " , st  );
+
+  st = getJsonString( isBatteryCharging );
+  publish( topic + "/isBatteryCharging" , st  );
+
+  if ( soilMoisture < 50 )
+  {
+    canSleep = false;
+    agrumino.turnWateringOn();
+    st = getJsonString( "Watering ON" );
+    publish( topic + "/log" , st  );
+    return;
+  }
 
 
   canSleep = true;
@@ -231,7 +279,7 @@ void loop()
   mqtt.loop();
   timeClient.update();
 
-  agrumino.turnBoardOn();
+  
 
   // Blink when the business is done for giving an Ack to the user
   blinkLed(500, 1);
@@ -244,6 +292,16 @@ void loop()
   
     // delaySec(SLEEP_TIME_SEC); // The ESP8266 stays powered, executes the loop repeatedly
     deepSleepSec(SLEEP_TIME_SEC); // ESP8266 enter in deepSleep and after the selected time starts back from setup() and then loop()
+  }
+  else
+  {
+    if ( millis() - lastSendDataMillis > SEND_DATA_EVERY_MS )
+    {
+      lastSendDataMillis = millis();
+      sendData();
+    }
+    
+
   }
 }
 
@@ -283,6 +341,58 @@ String getFullJsonString(float temp, int soil, unsigned int lux, float batt, uns
   return jsonPostString;
  }
 
+
+String getJsonString(float value ) 
+{
+  
+  jsonBuffer.clear();
+  jsonBuffer["timestamp"] =  timeClient.getEpochTime();
+  jsonBuffer[ "value" ] = value;
+
+  String jsonPostString;
+  serializeJson( jsonBuffer, jsonPostString);
+
+  return jsonPostString;
+ }
+
+String getJsonString(String value) 
+{
+  
+  jsonBuffer.clear();
+  jsonBuffer["timestamp"] =  timeClient.getEpochTime();
+  jsonBuffer[ "value" ] = value;
+
+  String jsonPostString;
+  serializeJson( jsonBuffer, jsonPostString);
+
+  return jsonPostString;
+ }
+
+String getJsonString(bool value) 
+{
+  
+  jsonBuffer.clear();
+  jsonBuffer["timestamp"] =  timeClient.getEpochTime();
+  jsonBuffer[ "value" ] = value;
+
+  String jsonPostString;
+  serializeJson( jsonBuffer, jsonPostString);
+
+  return jsonPostString;
+ }
+
+String getJsonString(int value) 
+{
+  
+  jsonBuffer.clear();
+  jsonBuffer["timestamp"] =  timeClient.getEpochTime();
+  jsonBuffer[ "value" ] = value;
+
+  String jsonPostString;
+  serializeJson( jsonBuffer, jsonPostString);
+
+  return jsonPostString;
+ }
 
 /////////////////////
 // Utility methods //

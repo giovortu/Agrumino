@@ -173,8 +173,7 @@ void sendData()
 {
   mqtt.loop();
   float temperature =         agrumino.readTempC();
-  unsigned int soilMoisture = agrumino.readSoil();
-  
+  unsigned int soilMoisture = agrumino.readSoil();  
   float illuminance =         agrumino.readLux();
   float batteryVoltage =      agrumino.readBatteryVoltage();
   unsigned int batteryLevel = agrumino.readBatteryLevel();
@@ -184,41 +183,38 @@ void sendData()
   
   String topic = String("/casa/sensors/") + dweetThingName;
 
-  //String full = getFullJsonString( temperature, soilMoisture, illuminance, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
-  
   String st = "";
   
   st =getJsonString( temperature );
   publish( topic + "/temperature" , st  );
 
     st = getJsonString( (int)soilMoisture );
-  publish( topic + "/soilMoisture" , st  );
+  publish( topic + "/soil_moisture" , st  );
 
   st = getJsonString( illuminance );
-  publish( topic + "/illuminance" , st  );
+  publish( topic + "/luminosity" , st  );
 
   st = getJsonString( batteryVoltage );
-  publish( topic + "/batteryVoltage" , st  );
+  publish( topic + "/battery_voltage" , st  );
 
   st = getJsonString( (int)batteryLevel );
-  publish( topic + "/batteryLevel" , st  );
+  publish( topic + "/battery_level" , st  );
 
   st = getJsonString( isAttachedToUSB  );
-  publish( topic + "/isAttachedToUSB " , st  );
+  publish( topic + "/is_attached_to_usb" , st  );
 
   st = getJsonString( isBatteryCharging );
-  publish( topic + "/isBatteryCharging" , st  );
+  publish( topic + "/is_battery_charging" , st  );
 
   if ( soilMoisture < 50 )
   {
     //canSleep = false;
     //agrumino.turnWateringOn();
-    st = getJsonString( "Watering ON" );
-    publish( topic + "/log" , st  );
+    publish( topic + "/log" , "Watering ON"  );
     //return;
   }
 
-
+#ifdef TEST
   String lum = "{\"unit\":\"lumen\",\"type\":\"luminosity\",\"value\":" + String( illuminance ) + "}";
   mqtt.publish("/ufficio28/acquario/sensors/luminosity", lum.c_str() );
 
@@ -227,6 +223,7 @@ void sendData()
 
   String hum = "{\"unit\":\"%\",\"type\":\"humidity\",\"value\":" + String( soilMoisture ) + "}";
   mqtt.publish("/ufficio28/acquario/sensors/humidity", hum.c_str() );
+#endif
 
   canSleep = true;
 }

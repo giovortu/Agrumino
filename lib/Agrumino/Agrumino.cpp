@@ -232,6 +232,7 @@ unsigned int Agrumino::readGPIO(gpio_pin pin) {
   } else {
     Serial.println("Error! gpio pin [" + String(pin) + "] is not set as OUTPUT, unable to write");
   }
+  return 0;
 }
 
 // write to the given GPIO "pin" the given "value"

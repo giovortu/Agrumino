@@ -120,7 +120,7 @@ void setup()
   
   while (!timeClient.update() );
 
-  unsigned long epoch = timeClient.getEpochTime();
+  epoch = timeClient.getEpochTime();
   
   getDateTime(epoch, "UTC", currentDateTime);
 
@@ -141,7 +141,7 @@ void setup()
   Serial.println("### Your Device name is ###");
   Serial.println("###   --> " + dweetThingName + " <--  ###");
   Serial.println("###################################\n");
-  Serial.println("epoch      :       " + String ( timeClient.getEpochTime() ));
+  Serial.println("timestamp  :       " + String ( currentDateTime ));
   Serial.println("temperature:       " + String(temperature) + "°C");
   Serial.println("soilMoisture:      " + String(soilMoisture) + "%");
   Serial.println("illuminance :      " + String(illuminance) + " lux");
@@ -209,10 +209,18 @@ void sendData()
   if ( soilMoisture < 50 )
   {
     //canSleep = false;
+    isWatering = true;
     //agrumino.turnWateringOn();
     publish( topic + "/log" , "Watering ON"  );
     //return;
   }
+  else
+  {
+    isWatering = false;
+  }
+
+  st = getJsonString( isWatering );
+  publish( topic + "/is_watering" , st  );
 
 #ifdef TEST
   String lum = "{\"unit\":\"lumen\",\"type\":\"luminosity\",\"value\":" + String( illuminance ) + "}";
@@ -275,6 +283,7 @@ String getFullJsonString(float temp, int soil, unsigned int lux, float batt, uns
   
   jsonBuffer.clear();
   jsonBuffer["timestamp"] =  String(currentDateTime);
+  jsonBuffer["epoch"] =  epoch;
   jsonBuffer["temperature"] = temp;
   jsonBuffer["soil"] =  soil;
   jsonBuffer["lux"]  = lux;
@@ -293,6 +302,7 @@ String getJsonString(float value )
 {
   jsonBuffer.clear();
   jsonBuffer["timestamp"] =  String(currentDateTime);
+  jsonBuffer["epoch"] =  epoch;
   jsonBuffer[ "value" ] = value;
 
   String jsonPostString;
@@ -306,6 +316,7 @@ String getJsonString(String value)
   
   jsonBuffer.clear();
   jsonBuffer["timestamp"] =  String(currentDateTime);
+  jsonBuffer["epoch"] =  epoch;
   jsonBuffer[ "value" ] = value;
 
   String jsonPostString;
@@ -319,6 +330,7 @@ String getJsonString(bool value)
   
   jsonBuffer.clear();
   jsonBuffer["timestamp"] =  String(currentDateTime);
+  jsonBuffer["epoch"] =  epoch;
   jsonBuffer[ "value" ] = value;
 
   String jsonPostString;
@@ -332,6 +344,7 @@ String getJsonString(int value)
   
   jsonBuffer.clear();
   jsonBuffer["timestamp"] = String(currentDateTime);
+  jsonBuffer["epoch"] =  epoch;
   jsonBuffer[ "value" ] = value;
 
   String jsonPostString;

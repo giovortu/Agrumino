@@ -22,11 +22,11 @@
 #include <NTPClient.h>
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_SEC 4200  
+#define SLEEP_TIME_SEC (60*60)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 
-const char *MQTT_BROKER = "10.0.128.128";
-//const char *MQTT_BROKER = "192.168.0.227";
+//const char *MQTT_BROKER = "10.0.128.128";
+const char *MQTT_BROKER = "192.168.0.227";
 const int MQTT_PORT = 1883;
 long int lastSendDataMillis = 0;
 #define SEND_DATA_EVERY_MS 1500
@@ -49,6 +49,9 @@ bool shouldSaveConfig = false;
 
   
 char currentDateTime[64];
+unsigned long epoch = 0;
+
+bool isWatering = false;
 
 int g_mqttConnectionTimeout = 0;
 int g_wifiConnectionTimeout = 0;

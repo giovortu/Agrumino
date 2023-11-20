@@ -10,75 +10,43 @@
 
 
 #include <TimeLib.h>    
+#include <ESP8266WiFi.h>
+#include <espnow.h>
 
-#include <ESP8266WiFi.h>        // https://github.com/esp8266/Arduino
-#include <DNSServer.h>          // Installed from ESP8266 board
-
-#include <WiFiManager.h>        // https://github.com/tzapu/WiFiManager
 #include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
-
-#include <PubSubClient.h>
-#include <WiFiUdp.h>
-#include <NTPClient.h>
 
 // Time to sleep in second between the readings/data sending
 #define SLEEP_TIME_SEC (60*30)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
 
-const char *MQTT_BROKER = "10.0.128.128";
-//const char *MQTT_BROKER = "192.168.0.227";
-const int MQTT_PORT = 1883;
-long int lastSendDataMillis = 0;
-#define SEND_DATA_EVERY_MS 1500
+#define RETRY_INTERVAL 50
 
-// Our super cool lib
+static uint8_t broadcastAddress[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+long currentMillis = millis();
+#define MAX_WAIT_RESPONSE_TIME 10000
+
 Agrumino agrumino;
 
-// Used for sending Json POST requests
 StaticJsonDocument<200> jsonBuffer;
 
-// Used to create TCP connections and make Http calls
-WiFiClient client;
-WiFiUDP ntpUDP;
-
-NTPClient timeClient(ntpUDP);
-
-PubSubClient mqtt;
 bool canSleep = false;
-bool shouldSaveConfig = false;
-
-  
-char currentDateTime[64];
-unsigned long epoch = 0;
 
 bool isWatering = false;
 
-int g_mqttConnectionTimeout = 0;
-int g_wifiConnectionTimeout = 0;
-
-
-
 const String getChipId();
 void deepSleepSec(uint64_t sec);
-bool checkIfResetWiFiSettings();
-String getFullJsonString(float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge);
-String getJsonString(float value) ;
-String getJsonString(bool value) ;
-String getJsonString(int value) ;
-String getJsonString(String value);
+void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len);
+void sendCallBackFunction(u8 *mac_addr, u8 status);
 
-String getFullJsonString(float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge) ;
-boolean checkIfResetWiFiSettings() ;
+String getFullJsonString(String id, float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge);
+
 void blinkLed(int duration, int blinks);
 void delaySec(int sec);
 
 const String getChipId();
-boolean checkIfResetWiFiSettings();
 void sendData();
-void mqttCallback(const char *topic, byte *message, unsigned int length);
-void getDateTime(time_t t, const char *tz, char *buf);
-void publish( String _topic, String _payload );
 
 
 

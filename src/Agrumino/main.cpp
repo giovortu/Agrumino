@@ -66,6 +66,7 @@ bool mqttConnect()
 void goToSleep( const String& reason, int blink_times = 5 )
 {
     Serial.println( reason );
+    //Serial.println( ESP.deepSleepMax() );
     // Blink when the business is done for giving an Ack to the user
     blinkLed(500, blink_times);
     // Board off before delay/sleep to save battery :)
@@ -234,6 +235,7 @@ void sendData()
 #endif
 
   canSleep = true;
+
 }
 
 void loop() 
@@ -248,8 +250,8 @@ void loop()
     // Board off before delay/sleep to save battery :)
     agrumino.turnBoardOff();
   
-    delaySec(1); // The ESP8266 stays powered, executes the loop repeatedly
-    deepSleepSec(SLEEP_TIME_SEC); // ESP8266 enter in deepSleep and after the selected time starts back from setup() and then loop()
+    //delaySec(1); // The ESP8266 stays powered, executes the loop repeatedly
+    goToSleep("Bye bye...", SLEEP_TIME_SEC); // ESP8266 enter in deepSleep and after the selected time starts back from setup() and then loop()
   }
   else
   {
@@ -371,12 +373,12 @@ void delaySec(int sec) {
   delay (sec * 1000);
 }
 
-void deepSleepSec(int sec) {
+void deepSleepSec(uint64_t sec) {
   Serial.print("\nGoing to deepSleep for ");
   Serial.print(sec);
   Serial.println(" seconds... (ー.ー) zzz\n");
   ESP.deepSleep(sec * 1000000,WAKE_RF_DEFAULT); // microseconds
-  delay(100);
+
 }
 
 const String getChipId() {

@@ -137,15 +137,15 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
 {
   
   jsonBuffer.clear();
-  jsonBuffer["type"] = "sens";
+  jsonBuffer["type"] = "agri";
   jsonBuffer["id"] = id;
-  jsonBuffer["t"] = temp;
-  jsonBuffer["s"] =  soil;
-  jsonBuffer["l"]  = lux;
+  jsonBuffer["temp"] = temp;
+  jsonBuffer["soil"] =  soil;
+  jsonBuffer["lum"]  = lux;
   jsonBuffer["bv"] = batt;
   jsonBuffer["bl"] = battLevel;
-  jsonBuffer["c"] = charge; 
-  jsonBuffer["u"] =  usb;
+  jsonBuffer["charge"] = charge; 
+  jsonBuffer["usb"] =  usb;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);

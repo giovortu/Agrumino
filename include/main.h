@@ -16,7 +16,7 @@
 #include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_SEC (60*30)
+#define SLEEP_TIME_SEC (60*60)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
 

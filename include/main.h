@@ -19,6 +19,7 @@
 #define SLEEP_TIME_SEC (60*60)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
+//                       4294000000
 
 #define RETRY_INTERVAL 50
 

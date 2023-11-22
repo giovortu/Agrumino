@@ -94,6 +94,8 @@ void sendData()
   Serial.println("isBatteryCharging: " + String(isBatteryCharging));
   Serial.println();
 
+  //TODO: READ I2C SENSOR
+
   if ( soilMoisture < 50 )
   {
     //canSleep = false;
@@ -112,7 +114,7 @@ void sendData()
   uint8_t len = message.length();
 
   uint8_t messageArray[len + 1];
-  memccpy( messageArray, message.c_str(), '\0', len + 1 );
+  memccpy( messageArray, message.c_str(), '\n', len + 1 );
 
   esp_now_send(broadcastAddress, messageArray, len);
 
@@ -146,6 +148,7 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
   jsonBuffer["bl"] = battLevel;
   jsonBuffer["charge"] = charge; 
   jsonBuffer["usb"] =  usb;
+  jsonBuffer["hum"] =  22;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);

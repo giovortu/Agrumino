@@ -24,7 +24,7 @@ void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t 
 
 void sendCallBackFunction(u8 *mac_addr, u8 status) 
 {
-  Serial.println("Sent, waiting response...");
+  //Serial.println("Sent, waiting response...");
 }
 
 void setup() 

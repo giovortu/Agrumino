@@ -32,18 +32,24 @@ void sendCallBackFunction(u8 *mac_addr, u8 status)
 
 void setup() 
 { 
+  agrumino.setup();
+  
   currentMillis = millis();
 
+
+#ifdef USEGY21
+  Wire.begin(SDA, SCL);
+#endif
+  delay(40);
+
+  
   WiFi.mode(WIFI_STA);
 #ifdef DEBUG  
   Serial.begin(115200);
 #endif
 
-  agrumino.setup();
-
+  
   agrumino.turnBoardOn();
-
-  delay(40);
 
 #ifdef DEBUG  
   Serial.println();
@@ -86,6 +92,11 @@ void sendData()
   unsigned int batteryLevel = agrumino.readBatteryLevel();
   boolean isAttachedToUSB =   agrumino.isAttachedToUSB();
   boolean isBatteryCharging = agrumino.isBatteryCharging();
+#ifdef USEGY21
+  float hum = sensor.GY21_Humidity();
+#else
+  float hum = 0;
+#endif 
 
 #ifdef DEBUG  
   Serial.println("###################################");
@@ -117,7 +128,7 @@ void sendData()
   }
 
 
-  String message = getFullJsonString(m_id, temperature, soilMoisture, illuminance, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
+  String message = getFullJsonString(m_id, temperature, soilMoisture, illuminance, hum, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
 
   uint8_t len = message.length();
 
@@ -147,7 +158,7 @@ void loop()
 
 
 // Returns the Json body that will be sent to the send data HTTP POST API
-String getFullJsonString(String id, float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge) 
+String getFullJsonString(String id, float temp, int soil, unsigned int lux, float hum, float batt, unsigned int battLevel, boolean usb, boolean charge) 
 {
   
   jsonBuffer.clear();
@@ -160,7 +171,7 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
   jsonBuffer["bl"] = battLevel;
   jsonBuffer["charge"] = charge; 
   jsonBuffer["usb"] =  usb;
-  jsonBuffer["hum"] =  22;
+  jsonBuffer["hum"] =  hum;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);

@@ -8,6 +8,17 @@
 #define TIMEZONE_GENERIC_VERSION_MIN_TARGET      "Timezone_Generic v1.10.1"
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
+#define USEGY21 1
+//#define DEBUG 1
+
+#ifdef USEGY21
+#include <GY21.h>
+#define SCL 14 // D5 ON NODEMCU
+#define SDA 12 // D6 ON NODEMCU
+GY21 sensor;
+#endif
+
+
 
 #include <TimeLib.h>    
 #include <ESP8266WiFi.h>
@@ -41,7 +52,7 @@ void deepSleepSec(uint64_t sec);
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len);
 void sendCallBackFunction(u8 *mac_addr, u8 status);
 
-String getFullJsonString(String id, float temp, int soil, unsigned int lux, float batt, unsigned int battLevel, boolean usb, boolean charge);
+String getFullJsonString(String id, float temp, int soil, unsigned int lux, float hum, float batt, unsigned int battLevel, boolean usb, boolean charge);
 
 void blinkLed(int duration, int blinks);
 void delaySec(int sec);

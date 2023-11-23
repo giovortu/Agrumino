@@ -1,4 +1,4 @@
-
+#define DEBUG 1
 
 #include "main.h"
 
@@ -6,7 +6,9 @@ String m_id = getChipId();
 
 void goToSleep( const String& reason, int blink_times = 5 )
 {
+#ifdef DEBUG
     Serial.println( reason );
+#endif
     //Serial.println( ESP.deepSleepMax() );
     // Blink when the business is done for giving an Ack to the user
     //blinkLed(500, blink_times);
@@ -33,7 +35,9 @@ void setup()
 
   WiFi.mode(WIFI_STA);
 
+#ifdef DEBUG
   Serial.begin(115200);
+#endif
 
   // Setup our super cool lib
   agrumino.setup();
@@ -43,13 +47,17 @@ void setup()
 
   delay(100);
 
+#ifdef DEBUG
   Serial.println();
   Serial.println("ESP-Now Sender");
   Serial.printf("Transmitter mac: %s\n", WiFi.macAddress().c_str());
+#endif
 
   if (esp_now_init() != 0) 
   {
+#ifdef DEBUG    
     Serial.println("ESP_Now init failed...");
+#endif    
     delay(RETRY_INTERVAL);
     ESP.restart();
   }
@@ -58,7 +66,9 @@ void setup()
   esp_now_register_recv_cb(receiveCallBackFunction);
   esp_now_register_send_cb(sendCallBackFunction);
 
+#ifdef DEBUG
   Serial.println("Slave ready. Waiting for messages...");
+#endif  
 
   esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
 
@@ -72,14 +82,15 @@ void setup()
 
 void sendData()
 {
-  float temperature =         agrumino.readTempC();
-  unsigned int soilMoisture = agrumino.readSoil();  
-  float illuminance =         agrumino.readLux();
-  float batteryVoltage =      agrumino.readBatteryVoltage();
-  unsigned int batteryLevel = agrumino.readBatteryLevel();
-  boolean isAttachedToUSB =   agrumino.isAttachedToUSB();
-  boolean isBatteryCharging = agrumino.isBatteryCharging();
+  float temperature               = agrumino.readTempC();
+  uint16_t soilMoisture       = agrumino.readSoil();  
+  float illuminance               = agrumino.readLux();
+  float batteryVoltage            = agrumino.readBatteryVoltage();
+  uint16_t batteryLevel       = agrumino.readBatteryLevel();
+  bool isAttachedToUSB   = agrumino.isAttachedToUSB();
+  bool  isBatteryCharging = agrumino.isBatteryCharging();
 
+#ifdef DEBUG
   Serial.println("###################################");
   Serial.println("### Your Device name is ###");
   Serial.println("###   --> " + m_id + " <--  ###");
@@ -93,7 +104,7 @@ void sendData()
   Serial.println("isAttachedToUSB:   " + String(isAttachedToUSB));
   Serial.println("isBatteryCharging: " + String(isBatteryCharging));
   Serial.println();
-
+#endif
   //TODO: READ I2C SENSOR
 
   if ( soilMoisture < 50 )
@@ -108,6 +119,45 @@ void sendData()
     isWatering = false;
   }
 
+#ifndef USE_JSON
+
+  struct_message rawMsg;
+
+  memset( rawMsg.id, 0, 20 ); //Fill the struct
+
+  strncpy( rawMsg.id , m_id.c_str(), m_id.length() );
+  rawMsg.type = AGRUMINO;
+
+  agrumino_data data;
+  data.temp = temperature;
+  data.soil = soilMoisture;
+  data.lux = illuminance;
+  data.battVoltage = batteryVoltage;
+  data.battLevel = batteryLevel;
+  data.usbConnected = isAttachedToUSB;
+  data.charging = isBatteryCharging;
+
+  rawMsg.data = (uint8_t *)malloc(sizeof(agrumino_data));
+  memset( rawMsg.data, 0, sizeof(agrumino_data) ); //Fill the struct
+
+  memcpy(rawMsg.data, &data, sizeof(agrumino_data));
+
+  unsigned int rawDataSize = sizeof( struct_message ) + sizeof(agrumino_data);
+
+  String encodedMsg = base64::encode( (uint8_t *)&rawMsg, rawDataSize, false) + "\n";
+
+  esp_now_send(broadcastAddress, (uint8_t *) encodedMsg.c_str(), encodedMsg.length() );
+  //esp_now_send(broadcastAddress, (uint8_t *) &rawMsg, rawDataSize );
+
+
+#ifdef DEBUG
+  Serial.print("Message sent :");
+  Serial.println( sizeof( struct_message ) );
+  Serial.println( sizeof( agrumino_data ) );
+  
+#endif
+
+#else
 
   String message = getFullJsonString(m_id, temperature, soilMoisture, illuminance, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
 
@@ -118,8 +168,13 @@ void sendData()
 
   esp_now_send(broadcastAddress, messageArray, len);
 
+#ifdef DEBUG
   Serial.print("Message sent :");
   Serial.println( message );
+#endif
+
+#endif
+
 
 
 }
@@ -128,8 +183,18 @@ void loop()
 {
   if (millis() - currentMillis >= MAX_WAIT_RESPONSE_TIME) 
   {
-    Serial.println("No response, sleep!");
-    ESP.deepSleep(0);
+    retry++;
+    if (retry > MAX_RETRY) 
+    {
+#ifdef DEBUG      
+      Serial.println("Max retry reached, sleep!");
+#endif
+      ESP.deepSleep(0);
+    }
+#ifdef DEBUG
+    Serial.println("Retry!");
+#endif
+    sendData();
   }
 }
 

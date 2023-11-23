@@ -8,7 +8,7 @@
 #define TIMEZONE_GENERIC_VERSION_MIN_TARGET      "Timezone_Generic v1.10.1"
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
-
+#include <base64.h>
 #include <TimeLib.h>    
 #include <ESP8266WiFi.h>
 #include <espnow.h>
@@ -21,7 +21,8 @@
 //                      14835777529 max
 //                       4294000000
 
-#define RETRY_INTERVAL 50
+#define MAX_RETRY 5
+#define RETRY_INTERVAL 500
 
 static uint8_t broadcastAddress[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
@@ -29,6 +30,8 @@ long currentMillis = millis();
 #define MAX_WAIT_RESPONSE_TIME 10000
 
 Agrumino agrumino;
+
+int retry = 0;
 
 StaticJsonDocument<200> jsonBuffer;
 
@@ -48,6 +51,32 @@ void delaySec(int sec);
 
 const String getChipId();
 void sendData();
+
+typedef enum types
+{
+    AGRUMINO = 0,
+    TOGGLE,
+    ON_OFF,
+
+    NUM_TYPES
+}types;
+
+typedef struct agrumino_data {
+    float temp;
+    uint16_t soil;
+    float lux;
+    float battVoltage;
+    uint16_t battLevel;
+    bool usbConnected;
+    bool charging;
+} agrumino_data;
+
+typedef struct struct_message {
+    char id[20];
+    unsigned char type;
+    uint8_t *data;
+
+}struct_message;
 
 
 

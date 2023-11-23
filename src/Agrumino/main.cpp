@@ -14,7 +14,8 @@ void goToSleep( const String& reason, int blink_times = 5 )
     //blinkLed(500, blink_times);
     // Board off before delay/sleep to save battery :)
     agrumino.turnBoardOff();
-    delay(100);
+
+    delay(50);
     deepSleepSec(SLEEP_TIME_SEC);
     
 }
@@ -38,13 +39,11 @@ void setup()
   Serial.begin(115200);
 #endif
 
-  // Setup our super cool lib
   agrumino.setup();
 
-  // Turn on the board to allow the usage of the Led
   agrumino.turnBoardOn();
 
-  delay(100);
+  delay(40);
 
 #ifdef DEBUG  
   Serial.println();
@@ -122,7 +121,8 @@ void sendData()
 
   uint8_t len = message.length();
 
-  uint8_t messageArray[len + 1];
+  uint8_t messageArray[ 200 ];
+  memset(messageArray, '\0', 200);
   memccpy( messageArray, message.c_str(), '\n', len + 1 );
 
   esp_now_send(broadcastAddress, messageArray, len);

@@ -26,7 +26,7 @@
 static uint8_t broadcastAddress[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 long currentMillis = millis();
-#define MAX_WAIT_RESPONSE_TIME 10000
+#define MAX_WAIT_RESPONSE_TIME 2000
 
 Agrumino agrumino;
 

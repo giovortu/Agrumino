@@ -6,7 +6,9 @@ String m_id = getChipId();
 
 void goToSleep( const String& reason, int blink_times = 5 )
 {
+#ifdef DEBUG  
     Serial.println( reason );
+#endif
     //Serial.println( ESP.deepSleepMax() );
     // Blink when the business is done for giving an Ack to the user
     //blinkLed(500, blink_times);
@@ -32,8 +34,9 @@ void setup()
   currentMillis = millis();
 
   WiFi.mode(WIFI_STA);
-
+#ifdef DEBUG  
   Serial.begin(115200);
+#endif
 
   // Setup our super cool lib
   agrumino.setup();
@@ -43,13 +46,17 @@ void setup()
 
   delay(100);
 
+#ifdef DEBUG  
   Serial.println();
   Serial.println("ESP-Now Sender");
   Serial.printf("Transmitter mac: %s\n", WiFi.macAddress().c_str());
+#endif
 
   if (esp_now_init() != 0) 
   {
+  #ifdef DEBUG  
     Serial.println("ESP_Now init failed...");
+  #endif
     delay(RETRY_INTERVAL);
     ESP.restart();
   }
@@ -58,8 +65,9 @@ void setup()
   esp_now_register_recv_cb(receiveCallBackFunction);
   esp_now_register_send_cb(sendCallBackFunction);
 
+#ifdef DEBUG  
   Serial.println("Slave ready. Waiting for messages...");
-
+#endif
   esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
 
   delay(150);
@@ -80,6 +88,7 @@ void sendData()
   boolean isAttachedToUSB =   agrumino.isAttachedToUSB();
   boolean isBatteryCharging = agrumino.isBatteryCharging();
 
+#ifdef DEBUG  
   Serial.println("###################################");
   Serial.println("### Your Device name is ###");
   Serial.println("###   --> " + m_id + " <--  ###");
@@ -93,7 +102,7 @@ void sendData()
   Serial.println("isAttachedToUSB:   " + String(isAttachedToUSB));
   Serial.println("isBatteryCharging: " + String(isBatteryCharging));
   Serial.println();
-
+#endif
   //TODO: READ I2C SENSOR
 
   if ( soilMoisture < 50 )
@@ -118,9 +127,10 @@ void sendData()
 
   esp_now_send(broadcastAddress, messageArray, len);
 
+#ifdef DEBUG  
   Serial.print("Message sent :");
   Serial.println( message );
-
+#endif
 
 }
 
@@ -128,7 +138,9 @@ void loop()
 {
   if (millis() - currentMillis >= MAX_WAIT_RESPONSE_TIME) 
   {
+#ifdef DEBUG      
     Serial.println("No response, sleep!");
+#endif    
     ESP.deepSleep(0);
   }
 }

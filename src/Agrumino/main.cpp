@@ -171,7 +171,7 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
   jsonBuffer["bl"] = battLevel;
   jsonBuffer["charge"] = charge; 
   jsonBuffer["usb"] =  usb;
-  jsonBuffer["hum"] =  hum;
+  jsonBuffer["delta"] = SLEEP_TIME_MIN;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);

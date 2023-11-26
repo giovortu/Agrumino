@@ -8,7 +8,7 @@
 #define TIMEZONE_GENERIC_VERSION_MIN_TARGET      "Timezone_Generic v1.10.1"
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
-#define USEGY21 1
+//#define USEGY21 1
 //#define DEBUG 1
 
 #ifdef USEGY21
@@ -27,7 +27,8 @@ GY21 sensor;
 #include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_SEC (60*20)
+#define SLEEP_TIME_MIN 30
+#define SLEEP_TIME_SEC (60 * SLEEP_TIME_MIN)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
 //                       4294000000

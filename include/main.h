@@ -27,7 +27,7 @@ GY21 sensor;
 #include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_MIN 30
+#define SLEEP_TIME_MIN 10
 #define SLEEP_TIME_SEC (60 * SLEEP_TIME_MIN)
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
@@ -44,10 +44,6 @@ Agrumino agrumino;
 
 StaticJsonDocument<200> jsonBuffer;
 
-bool canSleep = false;
-
-bool isWatering = false;
-
 const String getChipId();
 void deepSleepSec(uint64_t sec);
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len);
@@ -60,7 +56,5 @@ void delaySec(int sec);
 
 const String getChipId();
 void sendData();
-
-
 
 #endif // AGRUMINO_H

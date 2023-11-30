@@ -2,22 +2,16 @@
 
 #include "main.h"
 
-String m_id = getChipId();
+String m_id = "";
 
 void goToSleep( const String& reason, int blink_times = 5 )
 {
 #ifdef DEBUG  
     Serial.println( reason );
 #endif
-    //Serial.println( ESP.deepSleepMax() );
-    // Blink when the business is done for giving an Ack to the user
-    //blinkLed(500, blink_times);
-    // Board off before delay/sleep to save battery :)
     agrumino.turnBoardOff();
-
     delay(50);
-    deepSleepSec(SLEEP_TIME_SEC);
-    
+    deepSleepSec(SLEEP_TIME_SEC);    
 }
 
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
@@ -27,28 +21,30 @@ void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t 
 
 void sendCallBackFunction(u8 *mac_addr, u8 status) 
 {
-  //Serial.println("Sent, waiting response...");
+#ifdef DEBUG  
+    Serial.println("Sent, waiting response...");
+#endif
 }
 
 
 void setup() 
 { 
-  agrumino.setup();
-  
+  agrumino.setup();  
   currentMillis = millis();
-
 
 #ifdef USEGY21
   Wire.begin(SDA, SCL);
 #endif
   delay(40);
-
   
   WiFi.mode(WIFI_STA);
+
+  m_id = WiFi.macAddress();
+  m_id.replace(":", "" );
+
 #ifdef DEBUG  
   Serial.begin(115200);
 #endif
-
   
   agrumino.turnBoardOn();
 
@@ -114,20 +110,6 @@ void sendData()
   Serial.println("isBatteryCharging: " + String(isBatteryCharging));
   Serial.println();
 #endif
-  //TODO: READ I2C SENSOR
-
-  if ( soilMoisture < 50 )
-  {
-    //canSleep = false;
-    isWatering = true;
-    //agrumino.turnWateringOn();
-    //return;
-  }
-  else
-  {
-    isWatering = false;
-  }
-
 
   String message = getFullJsonString(m_id, temperature, soilMoisture, illuminance, hum, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
 
@@ -143,7 +125,6 @@ void sendData()
   Serial.print("Message sent :");
   Serial.println( message );
 #endif
-
 }
 
 void loop() 
@@ -172,7 +153,7 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
   jsonBuffer["bl"] = battLevel;
   jsonBuffer["charge"] = charge; 
   jsonBuffer["usb"] =  usb;
-  jsonBuffer["delta"] = SLEEP_TIME_MIN;
+  //jsonBuffer["delta"] = SLEEP_TIME_MIN;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);
@@ -208,7 +189,7 @@ void deepSleepSec(uint64_t sec) {
 
 }
 
-const String getChipId() {
-  // Returns the ESP Chip ID, Typical 7 digits
-  return String(ESP.getChipId());
+const String getChipId() 
+{
+  return m_id;
 }

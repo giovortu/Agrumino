@@ -1,6 +1,8 @@
 #ifndef AGRUMINO_H
 #define AGRUMINO_H
 
+#include "defines.h"
+
 #include <FS.h>     
 
 #include <Agrumino.h>

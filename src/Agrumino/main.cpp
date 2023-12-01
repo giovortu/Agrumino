@@ -39,8 +39,12 @@ void setup()
   
   WiFi.mode(WIFI_STA);
 
+#ifdef USE_MAC_AS_ID  
   m_id = WiFi.macAddress();
   m_id.replace(":", "" );
+#else
+  m_id = ESP.getChipId();
+#endif 
 
 #ifdef DEBUG  
   Serial.begin(115200);

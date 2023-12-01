@@ -10,6 +10,7 @@
 
 //#define USEGY21 1
 //#define DEBUG 1
+//#define USE_MAC_AS_ID 1
 
 #ifdef USEGY21
 #include <GY21.h>

@@ -134,7 +134,7 @@ void loop()
 #ifdef DEBUG      
     Serial.println("No response, sleep!");
 #endif    
-    ESP.deepSleep(0);
+    deepSleepSec( SLEEP_TIME_SEC_NO_RESP );    
   }
 }
 

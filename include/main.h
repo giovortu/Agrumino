@@ -9,7 +9,7 @@
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
 //#define USEGY21 1
-//#define DEBUG 1
+#define DEBUG 1
 
 #ifdef USEGY21
 #include <GY21.h>
@@ -28,7 +28,10 @@ GY21 sensor;
 
 // Time to sleep in second between the readings/data sending
 #define SLEEP_TIME_MIN 10
+#define SLEEP_TIME_MIN_NO_RESP 10
 #define SLEEP_TIME_SEC (60 * SLEEP_TIME_MIN)
+#define SLEEP_TIME_SEC_NO_RESP (60 * SLEEP_TIME_MIN_NO_RESP)
+
 //IMPORTANTE: MASSIMO  4294 secondi !!! 
 //                      14835777529 max
 //                       4294000000

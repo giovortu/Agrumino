@@ -30,8 +30,7 @@ GY21 sensor;
 #include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
 
 // Time to sleep in second between the readings/data sending
-#define SLEEP_TIME_MIN 20
-#define SLEEP_TIME_MIN_NO_RESP 10
+#define MAX_WAIT_RESPONSE_TIME ( MAX_WAIT_RESPONSE_TIME_SEC *1000 )
 #define SLEEP_TIME_SEC (60 * SLEEP_TIME_MIN)
 #define SLEEP_TIME_SEC_NO_RESP (60 * SLEEP_TIME_MIN_NO_RESP)
 
@@ -44,7 +43,6 @@ GY21 sensor;
 static uint8_t broadcastAddress[] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 long currentMillis = millis();
-#define MAX_WAIT_RESPONSE_TIME 2000
 
 Agrumino agrumino;
 

@@ -16,7 +16,8 @@ void goToSleep( const String& reason, int blink_times = 5 )
 
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
 {
-  goToSleep("Received!", SLEEP_TIME_SEC);
+  String rec = String( (char*) incomingData );
+  goToSleep("Received:" +rec, SLEEP_TIME_SEC);
 }
 
 void sendCallBackFunction(u8 *mac_addr, u8 status) 

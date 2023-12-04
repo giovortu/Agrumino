@@ -10,8 +10,8 @@
 #define TIMEZONE_GENERIC_VERSION_MIN_TARGET      "Timezone_Generic v1.10.1"
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
-//#define USEGY21 1
-//#define DEBUG 1
+#define USEGY21 1
+#define DEBUG 1
 //#define USE_MAC_AS_ID 1
 
 #ifdef USEGY21

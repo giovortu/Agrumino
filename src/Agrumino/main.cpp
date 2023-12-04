@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-String m_id = "";
+String m_id = String( ESP.getChipId() );
 
 void goToSleep( const String& reason, int blink_times = 5 )
 {
@@ -34,7 +34,11 @@ void setup()
   currentMillis = millis();
 
 #ifdef USEGY21
+#ifdef ESP8266
   Wire.begin(SDA, SCL);
+#else
+  Wire.begin();
+#endif
 #endif
   delay(40);
   
@@ -44,7 +48,7 @@ void setup()
   m_id = WiFi.macAddress();
   m_id.replace(":", "" );
 #else
-  m_id = ESP.getChipId();
+  m_id = String( ESP.getChipId() );
 #endif 
 
 #ifdef DEBUG  
@@ -108,6 +112,7 @@ void sendData()
 
   Serial.println("temperature:       " + String(temperature) + "°C");
   Serial.println("soilMoisture:      " + String(soilMoisture) + "%");
+  Serial.println("humidity    :      " + String(hum) + "%");
   Serial.println("illuminance :      " + String(illuminance) + " lux");
   Serial.println("batteryVoltage :   " + String(batteryVoltage) + " V");
   Serial.println("batteryLevel :     " + String(batteryLevel) + "%");
@@ -127,7 +132,7 @@ void sendData()
   esp_now_send(broadcastAddress, messageArray, len);
 
 #ifdef DEBUG  
-  Serial.print("Message sent :");
+  Serial.println("Message sent :");
   Serial.println( message );
 #endif
 }
@@ -158,7 +163,7 @@ String getFullJsonString(String id, float temp, int soil, unsigned int lux, floa
   jsonBuffer["bl"] = battLevel;
   jsonBuffer["charge"] = charge; 
   jsonBuffer["usb"] =  usb;
-  //jsonBuffer["delta"] = SLEEP_TIME_MIN;
+  jsonBuffer["hum"] = hum;
 
   String jsonPostString;
   serializeJson( jsonBuffer, jsonPostString);

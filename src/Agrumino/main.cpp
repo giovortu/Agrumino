@@ -4,20 +4,51 @@
 
 String m_id = String( ESP.getChipId() );
 
-void goToSleep( const String& reason, int blink_times = 5 )
+void goToSleep( const String& reason, float time  )
 {
 #ifdef DEBUG  
-    Serial.println( reason );
+    Serial.print( reason );
+    Serial.println( ", sleep for " + String( time ) + " seconds" );
 #endif
     agrumino.turnBoardOff();
     delay(50);
-    deepSleepSec(SLEEP_TIME_SEC);    
+    deepSleepSec( time );    
 }
 
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len) 
 {
-  String rec = String( (char*) incomingData );
-  goToSleep("Received:" +rec, SLEEP_TIME_SEC);
+  incomingData[len+1] = '\0';
+  String response = String( (char*) incomingData );
+
+  response.trim();  
+
+  jsonBuffer.clear();
+
+  DeserializationError error = deserializeJson(jsonBuffer, response);
+
+  if ( error == DeserializationError::Ok ) 
+  {
+    Serial.println("Received: " + response);
+    if ( jsonBuffer.containsKey("interval") )
+    {
+      Serial.println("key: " + response);
+      int interval = jsonBuffer["interval"].as<int>();
+      Serial.println( interval );
+      if ( interval > 0 )
+      {
+        goToSleep("Received:" +response, interval );
+        return;
+      }
+    }
+  }
+  else
+  {
+    goToSleep("Error:"  + String( error.c_str() ) );
+    return;
+  }
+
+   goToSleep("Default: " + response); //default
+ 
 }
 
 void sendCallBackFunction(u8 *mac_addr, u8 status) 
@@ -123,13 +154,17 @@ void sendData()
 
   String message = getFullJsonString(m_id, temperature, soilMoisture, illuminance, hum, batteryVoltage, batteryLevel, isAttachedToUSB, isBatteryCharging );
 
-  uint8_t len = message.length();
+  message.trim();
 
-  uint8_t messageArray[ 200 ];
-  memset(messageArray, '\0', 200);
-  memccpy( messageArray, message.c_str(), '\n', len + 1 );
+  size_t len = message.length();
 
-  esp_now_send(broadcastAddress, messageArray, len);
+  char *messageArray= new char[ len + 1];
+
+  memset(messageArray, 0 , len + 1);
+  memccpy( messageArray, message.c_str(), '\n', len + 1);
+
+  esp_now_send(broadcastAddress, (uint8_t*) messageArray, len);
+
 
 #ifdef DEBUG  
   Serial.println("Message sent :");
@@ -141,10 +176,7 @@ void loop()
 {
   if (millis() - currentMillis >= MAX_WAIT_RESPONSE_TIME) 
   {
-#ifdef DEBUG      
-    Serial.println("No response, sleep!");
-#endif    
-    deepSleepSec( SLEEP_TIME_SEC_NO_RESP );    
+    goToSleep( "No response, sleep!", SLEEP_TIME_SEC_NO_RESP );    
   }
 }
 

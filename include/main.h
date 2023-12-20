@@ -10,7 +10,7 @@
 #define TIMEZONE_GENERIC_VERSION_MIN_TARGET      "Timezone_Generic v1.10.1"
 #define TIMEZONE_GENERIC_VERSION_MIN             1010001
 
-#define USEGY21 1
+//#define USEGY21 1
 #define DEBUG 1
 //#define USE_MAC_AS_ID 1
 
@@ -46,13 +46,13 @@ long currentMillis = millis();
 
 Agrumino agrumino;
 
-StaticJsonDocument<200> jsonBuffer;
+StaticJsonDocument<1024> jsonBuffer;
 
 const String getChipId();
 void deepSleepSec(uint64_t sec);
 void receiveCallBackFunction(uint8_t *senderMac, uint8_t *incomingData, uint8_t len);
 void sendCallBackFunction(u8 *mac_addr, u8 status);
-
+void goToSleep( const String& reason, float time = SLEEP_TIME_SEC );
 String getFullJsonString(String id, float temp, int soil, unsigned int lux, float hum, float batt, unsigned int battLevel, boolean usb, boolean charge);
 
 void blinkLed(int duration, int blinks);
